@@ -23,7 +23,7 @@ func Add(description string, amount int, month int) (int, error) {
 
 	// check if balance for month has a budget
 	if err != nil {
-		return 0, fmt.Errorf(err.Error())
+		return 0, fmt.Errorf("%s", err.Error())
 	}
 
 	// if amount is greater than budget balance return error an terminate function execution
