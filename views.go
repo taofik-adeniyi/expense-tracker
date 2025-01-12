@@ -28,6 +28,10 @@ func HandleAddition(f []string) {
 		amount = n
 	}
 
-	added := Add(description, amount)
+	added, err := Add(description, amount, 0)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	fmt.Printf("# Expense added successfully (ID: %v)\n", added)
 }

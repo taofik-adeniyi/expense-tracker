@@ -15,12 +15,28 @@ type Expense struct {
 
 var budget map[int]int = make(map[int]int, 0) // map month to the months budget
 
-func Add(description string, amount int) int {
+func Add(description string, amount int, month int) (int, error) {
 	fmt.Println("expense-tracker", description, amount)
+
 	// check budget balance
+	b, err := getBudget(month)
+
+	// check if balance for month has a budget
+	if err != nil {
+		return 0, fmt.Errorf(err.Error())
+	}
+
 	// if amount is greater than budget balance return error an terminate function execution
-	// # Expense added successfully (ID: 2)
-	return 0
+	if amount > b {
+		return 0, fmt.Errorf("unable to add expense of %v for %v", amount, description)
+	}
+
+	// fetch expense file
+	// read the expense file
+	// create a new expense and add to file
+	// return the created expense
+
+	return 0, nil
 }
 
 func List() []Expense {
@@ -50,5 +66,12 @@ func SetBudget(month int, amount int) (int, error) {
 		return month, nil //budget[month]
 	}
 	return 0, fmt.Errorf("invalid month values passed %v", 0)
+}
+func getBudget(month int) (int, error) {
+
+	if val, ok := budget[month]; ok {
+		return val, nil
+	}
+	return 0, fmt.Errorf("no budget for the month of %v", month)
 }
 func ExportExpenses() {}
