@@ -1,1 +1,3 @@
-# expense-tracker
+# Expense Tracker
+
+expense-tracker --help
