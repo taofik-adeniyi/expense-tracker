@@ -16,6 +16,7 @@ type Expense struct {
 var budget map[int]int = make(map[int]int, 0) // map month to the months budget
 
 func Add(description string, amount int) int {
+	fmt.Println("expense-tracker", description, amount)
 	// check budget balance
 	// if amount is greater than budget balance return error an terminate function execution
 	// # Expense added successfully (ID: 2)
