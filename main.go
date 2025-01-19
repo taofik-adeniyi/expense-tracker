@@ -28,6 +28,8 @@ func main() {
 		//
 	case "list":
 		HandleList(flags[0:])
+	case "summary":
+		HandleSummary(flags[0:])
 	case "delete":
 	default:
 		fmt.Println("Invalid command passed supported commands are <add, list, update, delete, summary>")

@@ -49,6 +49,22 @@ var monthsOfYear = map[int]string{
 	12: "december",
 }
 
+func Summary() (Expenses, error) {
+	content, err := getFileContent(dbFileName)
+	if err != nil {
+		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+	}
+	if len(content) == 0 {
+		return []Expense{}, fmt.Errorf("No expense to be displayed \n")
+	}
+	var lists []Expense
+	err = json.Unmarshal(content, &lists)
+	if err != nil {
+		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+	}
+	return lists, nil
+}
+
 func ListExpenses() (Expenses, error) {
 	content, err := getFileContent(dbFileName)
 	if err != nil {
@@ -145,9 +161,17 @@ func List() []Expense {
 	return []Expense{}
 }
 
-func (e Expense) Summary(month *int) {
+func (e Expenses) Summary(month ...int) string {
 	// # Total expenses: $30
-	fmt.Printf("Total expenses: $%v", e.Amount)
+	var total int
+	if len(month) > 0 && month[0] >= 1 && month[0] <= 12 {
+
+	} else {
+		for _, value := range e {
+			total += value.Amount
+		}
+	}
+	return fmt.Sprintf("Total expenses: $%d", total)
 }
 
 func Delete() int {

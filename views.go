@@ -21,6 +21,20 @@ func HandleList(f []string) {
 	expenses.formatExpenses()
 }
 
+func HandleSummary(f []string) {
+	if len(f) != 2 {
+		log.Fatalf("Invalid summary command")
+	}
+
+	expenses, err := ListExpenses()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result := expenses.Summary()
+	fmt.Println(result)
+}
+
 func HandleAddition(f []string) {
 	fmt.Println("expense-tracker add")
 	if len(f) != 8 {
