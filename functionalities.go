@@ -17,7 +17,22 @@ type Expense struct {
 	Category    string    `json:"category"`
 }
 
-var defaultDB = make([]Expense, 0)
+type Expenses []Expense
+
+func (e Expenses) formatExpenses() {
+	// Print the header
+	fmt.Printf("%-4s %-12s %-15s %6s\n", "ID", "Date", "Description", "Amount")
+
+	for key, value := range e {
+		// Print the rows
+		// fmt.Printf("%-4d %-12s %-15v %6v\n", key, value.Date.Format("2006-01-02"), value.Description, value.Amount)
+		// fmt.Printf("%-4d %-12s %-15s $%6.2f\n", key, value.Date.Format("2006-01-02"), value.Description, value.Amount)
+		fmt.Printf("%-4d %-12s %-15s $%d\n", key+1, value.Date.Format("2006-01-02"), value.Description, value.Amount)
+	}
+
+}
+
+// var defaultDB = make([]Expense, 0)
 
 var monthsOfYear = map[int]string{
 	1:  "january",
@@ -34,6 +49,21 @@ var monthsOfYear = map[int]string{
 	12: "december",
 }
 
+func ListExpenses() (Expenses, error) {
+	content, err := getFileContent(dbFileName)
+	if err != nil {
+		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+	}
+	if len(content) == 0 {
+		return []Expense{}, fmt.Errorf("No expense to be displayed \n")
+	}
+	var lists []Expense
+	err = json.Unmarshal(content, &lists)
+	if err != nil {
+		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+	}
+	return lists, nil
+}
 func Add(description string, amount int, month int) (int, error) {
 	fmt.Printf("expense-tracker: description: %v amount: %v month: %v\n", description, amount, month)
 
@@ -71,7 +101,6 @@ func Add(description string, amount int, month int) (int, error) {
 
 	// fetch expense file
 	fileByte, err := getFileContent(dbFileName)
-	fmt.Println("fileByte", fileByte)
 	if err != nil {
 		fmt.Println("add get file err")
 		fmt.Printf("Error: %v", err.Error())
@@ -89,7 +118,7 @@ func Add(description string, amount int, month int) (int, error) {
 	fmt.Println("data", data)
 
 	var newExpense = Expense{
-		Id:          len(defaultDB) + 1,
+		Id:          len(data) + 1,
 		Date:        time.Now(),
 		Description: description,
 		Amount:      amount,
@@ -99,7 +128,6 @@ func Add(description string, amount int, month int) (int, error) {
 	fmt.Println("data:after", data)
 
 	savedByte, err := json.Marshal(&data)
-	fmt.Println("Byte to save", savedByte)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
@@ -107,12 +135,7 @@ func Add(description string, amount int, month int) (int, error) {
 	if err != nil {
 		fmt.Println("Error saving file:", err.Error())
 	}
-
-	// read the expense file
-	// create a new expense and add to file
-	// return the created expense
-
-	return 0, nil
+	return newExpense.Id, nil
 }
 
 func List() []Expense {

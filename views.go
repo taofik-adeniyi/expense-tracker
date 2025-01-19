@@ -2,12 +2,27 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 )
 
-func HandleAddition(f []string) {
+func HandleList(f []string) {
+	fmt.Println("expense-tracker list")
+	fmt.Println(len(f))
+	if len(f) != 2 {
+		fmt.Println("Invalid list comamnd")
+		os.Exit(1)
+	}
+	expenses, err := ListExpenses()
+	if err != nil {
+		log.Fatal(err)
+	}
+	expenses.formatExpenses()
+}
 
+func HandleAddition(f []string) {
+	fmt.Println("expense-tracker add")
 	if len(f) != 8 {
 		os.Exit(1)
 	}

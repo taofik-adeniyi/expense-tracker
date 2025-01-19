@@ -23,11 +23,11 @@ func main() {
 
 	switch flags[1] {
 	case "add":
-		fmt.Println("adding...")
 		HandleAddition(flags[0:])
 	case "update":
 		//
 	case "list":
+		HandleList(flags[0:])
 	case "delete":
 	default:
 		fmt.Println("Invalid command passed supported commands are <add, list, update, delete, summary>")
