@@ -6,9 +6,14 @@ import (
 	// "github.com/taofik-adeniyi/expense-tracker/utils"
 )
 
+const dbFileName = "expense-db.json"
+const balanceFileName = "balance-db.json"
+
 func main() {
+	createFileIfNotExists(dbFileName)
+	createFileIfNotExists(balanceFileName)
+	SetDefaultBalance()
 	flags := os.Args
-	fmt.Println("len", len(flags))
 
 	// fflags := utils.GetUserInput()
 	if len(flags) < 2 {
@@ -18,6 +23,7 @@ func main() {
 
 	switch flags[1] {
 	case "add":
+		fmt.Println("adding...")
 		HandleAddition(flags[0:])
 	case "update":
 		//
