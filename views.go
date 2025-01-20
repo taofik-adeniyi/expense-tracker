@@ -7,6 +7,13 @@ import (
 	"strconv"
 )
 
+func HandleUpdate(f []string) {
+
+}
+func HandleDelete(f []string) {
+
+}
+
 func HandleList(f []string) {
 	fmt.Println("expense-tracker list")
 	fmt.Println(len(f))

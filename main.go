@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	// "github.com/taofik-adeniyi/expense-tracker/utils"
 )
 
 const dbFileName = "expense-db.json"
@@ -15,7 +14,6 @@ func main() {
 	SetDefaultBalance()
 	flags := os.Args
 
-	// fflags := utils.GetUserInput()
 	if len(flags) < 2 {
 		fmt.Println("no command passed")
 		os.Exit(1)
@@ -25,16 +23,15 @@ func main() {
 	case "add":
 		HandleAddition(flags[0:])
 	case "update":
-		//
+		HandleUpdate(flags[0:])
 	case "list":
 		HandleList(flags[0:])
 	case "summary":
 		HandleSummary(flags[0:])
 	case "delete":
+		HandleDelete(flags[0:])
 	default:
 		fmt.Println("Invalid command passed supported commands are <add, list, update, delete, summary>")
 	}
 
 }
-
-// Add error handling to handle invalid inputs and edge cases (e.g. negative amounts, non-existent expense IDs, etc).
