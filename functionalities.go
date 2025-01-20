@@ -81,7 +81,7 @@ func ListExpenses() (Expenses, error) {
 	return lists, nil
 }
 func Add(description string, amount int, month int) (int, error) {
-	fmt.Printf("expense-tracker: description: %v amount: %v month: %v\n", description, amount, month)
+	// fmt.Printf("expense-tracker: description: %v amount: %v month: %v\n", description, amount, month)
 
 	// check budget balance
 	b, err := getBudget(month)
@@ -90,7 +90,7 @@ func Add(description string, amount int, month int) (int, error) {
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
-	fmt.Printf("the initial balance: %v \n", b)
+	// fmt.Printf("the initial balance: %v \n", b)
 
 	// checking budget
 	// if amount is greater than budget balance return error an terminate function execution
@@ -109,16 +109,15 @@ func Add(description string, amount int, month int) (int, error) {
 		fmt.Scanln(&amount)
 	}
 	var amountToSet = b - amount
-	budget, err := SetBudget(month, amountToSet)
+	_, err = SetBudget(month, amountToSet)
 	if err != nil {
 		fmt.Printf("Error: %v", err.Error())
 	}
-	fmt.Printf("the budget saved: %v\n", budget)
+	// fmt.Printf("the budget saved: %v\n", budget)
 
 	// fetch expense file
 	fileByte, err := getFileContent(dbFileName)
 	if err != nil {
-		fmt.Println("add get file err")
 		fmt.Printf("Error: %v", err.Error())
 		return 0, err
 	}
@@ -131,7 +130,6 @@ func Add(description string, amount int, month int) (int, error) {
 			fmt.Println("Error: ", err.Error())
 		}
 	}
-	fmt.Println("data", data)
 
 	var newExpense = Expense{
 		Id:          len(data) + 1,
@@ -141,7 +139,6 @@ func Add(description string, amount int, month int) (int, error) {
 		Category:    "default category",
 	}
 	data = append(data, newExpense)
-	fmt.Println("data:after", data)
 
 	savedByte, err := json.Marshal(&data)
 	if err != nil {
@@ -200,7 +197,7 @@ func SetBudget(month int, amount int) (int, error) {
 	if month >= 1 && month <= 12 {
 		budget[month] = amount
 
-		fmt.Printf("your budget for the month of: %v is: %v\n", monthsOfYear[month], budget)
+		// fmt.Printf("your budget for the month of: %v is: %v\n", monthsOfYear[month], budget)
 		budgetByte, err := json.Marshal(budget)
 		if err != nil {
 			fmt.Printf("Error: %v", err)
@@ -306,7 +303,7 @@ func saveToFileDb(fileName string, content []byte) error {
 		os.Exit(1)
 		return fmt.Errorf("Error saving to file storage: %v \n", err)
 	}
-	fmt.Println("file content saved succesfully")
+	// fmt.Println("file content saved succesfully")
 	return nil
 }
 

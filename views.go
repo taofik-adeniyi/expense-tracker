@@ -59,7 +59,6 @@ func HandleAddition(f []string) {
 	var second = f[2]
 	var fourth = f[4]
 	var sixth = f[6]
-	fmt.Println("here....", sixth)
 
 	if second == "--description" {
 		description = f[3]
