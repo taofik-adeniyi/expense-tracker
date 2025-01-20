@@ -164,14 +164,21 @@ func List() []Expense {
 func (e Expenses) Summary(month ...int) string {
 	// # Total expenses: $30
 	var total int
+	var responseString string
 	if len(month) > 0 && month[0] >= 1 && month[0] <= 12 {
-
+		for _, value := range e {
+			if value.Date.Month() == time.Month(month[0]) {
+				total += value.Amount
+			}
+		}
+		responseString = fmt.Sprintf("Total expenses for %v: $%d", time.Month(month[0]), total)
 	} else {
 		for _, value := range e {
 			total += value.Amount
 		}
+		responseString = fmt.Sprintf("Total expenses: $%d", total)
 	}
-	return fmt.Sprintf("Total expenses: $%d", total)
+	return responseString
 }
 
 func Delete() int {

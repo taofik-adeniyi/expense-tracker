@@ -22,13 +22,25 @@ func HandleList(f []string) {
 }
 
 func HandleSummary(f []string) {
-	if len(f) != 2 {
+	if len(f) < 2 || len(f) > 4 {
 		log.Fatalf("Invalid summary command")
+	}
+	var monthFlag = f[2]
+
+	monthValue, err := strconv.Atoi(f[3])
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
 
 	expenses, err := ListExpenses()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if monthValue > 0 && monthFlag == "--month" {
+		result := expenses.Summary(monthValue)
+		fmt.Println(result)
+		return
 	}
 
 	result := expenses.Summary()
