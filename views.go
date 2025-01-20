@@ -8,7 +8,38 @@ import (
 )
 
 func HandleUpdate(f []string) {
+	// fmt.Println(len(f))
+	if len(f) < 5 || len(f) > 9 {
+		log.Fatal("update command error")
+	}
+	// var optionalArgs = f[5:9]
+	// fmt.Println(f[5]) // --amount
+	// fmt.Println("optionalArgs", optionalArgs)
+	// expense-tracker update id --description "" --amount "" --category "" //9
+	// result, err := Update()
+	id, err := strconv.Atoi(f[2])
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+	// var descriptionFlag = f[3]
+	var descriptionValue = f[4]
+	// var amountFlag = f[5]
+	amountValue, err := strconv.Atoi(f[6])
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+	// var categoryFlag = f[7]
+	var categoryValue = f[8]
+	// fmt.Println("id", id)
+	// fmt.Println("descriptionFlag:descriptionValue", descriptionFlag, descriptionValue)
+	// fmt.Println("amountFlag", amountFlag, amountValue)
+	// fmt.Println("categoryFlag", categoryFlag, categoryValue)
 
+	res, err := Update(id, descriptionValue, amountValue, categoryValue)
+	if err != nil {
+		log.Fatalf("Error Updating: %v", err)
+	}
+	fmt.Println(res)
 }
 func HandleDelete(f []string) {
 
@@ -16,7 +47,6 @@ func HandleDelete(f []string) {
 
 func HandleList(f []string) {
 	fmt.Println("expense-tracker list")
-	fmt.Println(len(f))
 	if len(f) != 2 {
 		fmt.Println("Invalid list comamnd")
 		os.Exit(1)

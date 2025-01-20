@@ -21,13 +21,10 @@ type Expenses []Expense
 
 func (e Expenses) formatExpenses() {
 	// Print the header
-	fmt.Printf("%-4s %-12s %-15s %6s\n", "ID", "Date", "Description", "Amount")
+	fmt.Printf("%-4v %-4s %-12s %-15s %6s\n", "#", "ID", "Date", "Description", "Amount")
 
 	for key, value := range e {
-		// Print the rows
-		// fmt.Printf("%-4d %-12s %-15v %6v\n", key, value.Date.Format("2006-01-02"), value.Description, value.Amount)
-		// fmt.Printf("%-4d %-12s %-15s $%6.2f\n", key, value.Date.Format("2006-01-02"), value.Description, value.Amount)
-		fmt.Printf("%-4d %-12s %-15s $%d\n", key+1, value.Date.Format("2006-01-02"), value.Description, value.Amount)
+		fmt.Printf("%-4v %-4d %-12s %-15s $%d\n", "#", key+1, value.Date.Format("2006-01-02"), value.Description, value.Amount)
 	}
 
 }
@@ -52,15 +49,15 @@ var monthsOfYear = map[int]string{
 func Summary() (Expenses, error) {
 	content, err := getFileContent(dbFileName)
 	if err != nil {
-		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+		return []Expense{}, fmt.Errorf("error: %v", err)
 	}
 	if len(content) == 0 {
-		return []Expense{}, fmt.Errorf("No expense to be displayed \n")
+		return []Expense{}, fmt.Errorf("no expense to be displayed")
 	}
 	var lists []Expense
 	err = json.Unmarshal(content, &lists)
 	if err != nil {
-		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+		return []Expense{}, fmt.Errorf("error: %v", err)
 	}
 	return lists, nil
 }
@@ -68,15 +65,15 @@ func Summary() (Expenses, error) {
 func ListExpenses() (Expenses, error) {
 	content, err := getFileContent(dbFileName)
 	if err != nil {
-		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+		return []Expense{}, fmt.Errorf("error: %v", err)
 	}
 	if len(content) == 0 {
-		return []Expense{}, fmt.Errorf("No expense to be displayed \n")
+		return []Expense{}, fmt.Errorf("no expense to be displayed")
 	}
 	var lists []Expense
 	err = json.Unmarshal(content, &lists)
 	if err != nil {
-		return []Expense{}, fmt.Errorf("Error: %v \n", err)
+		return []Expense{}, fmt.Errorf("error: %v", err)
 	}
 	return lists, nil
 }
@@ -151,13 +148,6 @@ func Add(description string, amount int, month int) (int, error) {
 	return newExpense.Id, nil
 }
 
-func List() []Expense {
-	// 	# ID  Date       Description  Amount
-	// # 1   2024-08-06  Lunch        $20
-	// # 2   2024-08-06  Dinner       $10
-	return []Expense{}
-}
-
 func (e Expenses) Summary(month ...int) string {
 	// # Total expenses: $30
 	var total int
@@ -182,16 +172,49 @@ func Delete() int {
 	// # Expense deleted successfully
 	return 0
 }
-func Update(id int) {
+func Update(id int, description string, amount int, category string) (string, error) {
+
+	var contentData Expenses
+	contentByte, err := getFileContent(dbFileName)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(contentByte, &contentData)
+	if err != nil {
+		return "", err
+	}
+	var found bool
+	for key, value := range contentData {
+		if value.Id == id {
+			found = true
+			if category != "" {
+				contentData[key].Category = category
+			}
+			if amount != 0 {
+				contentData[key].Amount = amount
+			}
+			if description != "" {
+				contentData[key].Description = description
+			}
+			contentData[key].Date = time.Now()
+		}
+	}
+	if !found {
+		return "", fmt.Errorf("Expense with ID %d not found", id)
+	}
+
+	contentByteToSave, err := json.Marshal(contentData)
+	if err != nil {
+		return "", err
+	}
+	err = saveToFileDb(dbFileName, contentByteToSave)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("Expense updated successfully (ID: %d)", id), nil
 
 }
 func SetBudget(month int, amount int) (int, error) {
-	// 1->january,2,3,4,5,6,7,8,9,10,11,12
-	// the month cant be more or less than the numbers 1-12
-	// set budget for each month
-	// var budget map[int]int = make(map[int]int, 0) // map month to the months budget
-	// getBudget()
-
 	budget := getAppBudget()
 
 	if month >= 1 && month <= 12 {
