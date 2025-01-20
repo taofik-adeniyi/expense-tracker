@@ -168,9 +168,35 @@ func (e Expenses) Summary(month ...int) string {
 	return responseString
 }
 
-func Delete() int {
+func Delete(id int) (int, error) {
 	// # Expense deleted successfully
-	return 0
+	var data Expenses
+	var newData Expenses
+	var found *bool
+	contentByte, err := getFileContent(dbFileName)
+	if err != nil {
+		return 0, err
+	}
+	err = json.Unmarshal(contentByte, &data)
+	if err != nil {
+		return 0, err
+	}
+	for _, value := range data {
+		if value.Id == id {
+			*found = true
+			continue
+		}
+		newData = append(newData, value)
+	}
+	toSaveByte, err := json.Marshal(newData)
+	if err != nil {
+		return 0, nil
+	}
+	err = saveToFileDb(dbFileName, toSaveByte)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 func Update(id int, description string, amount int, category string) (string, error) {
 

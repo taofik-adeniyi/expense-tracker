@@ -42,7 +42,23 @@ func HandleUpdate(f []string) {
 	fmt.Println(res)
 }
 func HandleDelete(f []string) {
-
+	// check the length of the commands after the executable name
+	// expense-tracker delete --id 2
+	// Expense deleted successfully
+	if len(f) != 4 {
+		log.Fatal("Invalid delete command: the valid command is expense-tracker delete --id <id>")
+	}
+	if f[2] == "--id" {
+		id, err := strconv.Atoi(f[3])
+		if err != nil {
+			log.Fatalf("invalid format type of id: %v", err)
+		}
+		res, err := Delete(id)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
+		fmt.Printf("# Expense with id of: %d deleted successfully\n", res)
+	}
 }
 
 func HandleList(f []string) {
