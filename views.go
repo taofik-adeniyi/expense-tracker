@@ -8,6 +8,21 @@ import (
 	"strings"
 )
 
+var categories []string
+
+func HandleCategory(flags []string) {
+	//expense-tracker add-category <category_name>
+	if len(flags) != 3 {
+		log.Fatal("Invalid command")
+	}
+	if flags[1] != "add-category" {
+		log.Fatal("Invalid command")
+	}
+	category_name := flags[2]
+	categories = append(categories, category_name)
+	fmt.Printf("Category: %v added successfully\n", category_name)
+}
+
 func HandleExport(flags []string) {
 	//expense-tracker export <filename.csv>
 	if len(flags) != 3 {
