@@ -168,6 +168,25 @@ func (e Expenses) Summary(month ...int) string {
 	return responseString
 }
 
+func (e Expenses) SummaryByCategory(category string) string {
+	// # Total expenses: $30
+	var total int
+	var responseString string
+	var found bool
+
+	for _, value := range e {
+		if value.Category == category {
+			found = true
+			total += value.Amount
+		}
+	}
+	responseString = fmt.Sprintf("Total expenses: $%d", total)
+	if !found {
+		return fmt.Sprintf("No expense for category: %s\n", category)
+	}
+	return responseString
+}
+
 func Delete(id int) (int, error) {
 	// # Expense deleted successfully
 	var data Expenses

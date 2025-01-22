@@ -74,30 +74,59 @@ func HandleList(f []string) {
 	expenses.formatExpenses()
 }
 
-func HandleSummary(f []string) {
-	if len(f) < 2 || len(f) > 4 {
-		log.Fatalf("Invalid summary command")
-	}
-	var monthFlag = f[2]
-
-	monthValue, err := strconv.Atoi(f[3])
+func SummaryCategory(flags []string) {
+	fmt.Printf("expense-tracker summary %s %s \n", flags[0], flags[1])
+	expenses, err := ListExpenses()
 	if err != nil {
-		log.Fatalf("Error: %v", err)
+		log.Fatal(err)
 	}
+	res := expenses.SummaryByCategory(flags[1])
+	fmt.Println(res)
+}
+func SummaryMonth(flags []string) {
+	monthId, err := strconv.Atoi(flags[1])
+	if err != nil {
+		log.Fatalf("Error: month value should be in the range 1-12 not more not less\nWhere 1-12 represents january to december\n%v", err)
+	}
+	fmt.Printf("expense-tracker summary %s %d \n", flags[0], monthId)
 
 	expenses, err := ListExpenses()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if monthValue > 0 && monthFlag == "--month" {
-		result := expenses.Summary(monthValue)
+	if monthId >= 1 && monthId <= 12 {
+		result := expenses.Summary(monthId)
+		fmt.Println(result)
+		return
+	}
+}
+
+func HandleSummary(f []string) {
+	if len(f) < 2 || len(f) > 4 {
+		log.Fatalf("Invalid summary command")
+	}
+
+	if len(f) == 2 {
+		expenses, err := ListExpenses()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		result := expenses.Summary()
 		fmt.Println(result)
 		return
 	}
 
-	result := expenses.Summary()
-	fmt.Println(result)
+	switch f[2] {
+	case "--month":
+		SummaryMonth(f[2:])
+		return
+	case "--category":
+		SummaryCategory(f[2:])
+		return
+	}
+
 }
 
 func HandleAddition(f []string) {

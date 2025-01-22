@@ -30,6 +30,14 @@ func main() {
 		HandleSummary(flags[0:])
 	case "delete":
 		HandleDelete(flags[0:])
+	case "add-category":
+		break
+	case "set-budget":
+		break
+	case "export":
+		break
+	case "--help":
+		break
 	default:
 		fmt.Println("Invalid command passed supported commands are <add, list, update, delete, summary>")
 	}
