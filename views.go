@@ -5,8 +5,47 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
+func HandleExport(flags []string) {
+	//expense-tracker export <filename.csv>
+	if len(flags) != 3 {
+		log.Fatal("Invalid export command\nExpense-tracker export <filename.csv>")
+	}
+	var fileName = flags[2]
+	data := strings.Split(fileName, ".")
+	ext := data[1]
+	if ext != "csv" {
+		log.Fatal("Invalid file name format provide a .csv file format")
+	}
+	fmt.Print(flags)
+
+	ExportExpensesToCsv(fileName)
+}
+
+func HandleBudget(flags []string) {
+	//expense-tracker set-budget --month <month> --amount <amount>
+	if len(flags) != 6 {
+		log.Fatal("Invalid command")
+	}
+	if flags[1] != "set-budget" {
+		log.Fatal("invalid command")
+	}
+	month, err := strconv.Atoi(flags[3])
+	if err != nil {
+		log.Fatalf("Error: %v\n", err)
+	}
+	amount, err := strconv.Atoi(flags[5])
+	if err != nil {
+		log.Fatalf("Error: %v\n", err)
+	}
+	res, err := SetBudget(month, amount)
+	if err != nil {
+		log.Fatalf("Error: %v\n", err)
+	}
+	fmt.Printf("Budget of month %v set to: $%d \n", monthsOfYear[month], res)
+}
 func HandleUpdate(f []string) {
 	// fmt.Println(len(f))
 	if len(f) < 5 || len(f) > 9 {

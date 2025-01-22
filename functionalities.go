@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -272,7 +276,7 @@ func SetBudget(month int, amount int) (int, error) {
 		}
 		saveToFileDb(balanceFileName, budgetByte)
 
-		return month, nil //budget[month]
+		return amount, nil //budget[month]
 	}
 	return 0, fmt.Errorf("invalid month values passed %v", 0)
 }
@@ -386,19 +390,126 @@ func getFileContent(fileName string) ([]byte, error) {
 	return bytes, nil
 }
 
-func createFileIfNotExists(fileName string) {
+func createFileIfNotExists(fileName string) *os.File {
 
 	tF, err := os.Open(fileName)
 
 	if err != nil {
 		fmt.Printf("Error: %v\n", err.Error())
-		fmt.Println("Creating db file.....")
+		fmt.Println("Creating file.....")
 		file, err := os.Create(fileName)
 		if err != nil {
 			fmt.Printf("Error: %v", err.Error())
 		}
-		fmt.Printf("Db file created: %v\n", file.Name())
+		fmt.Printf("File created: %v\n", file.Name())
 	}
 	defer tF.Close()
+	return tF
 
+}
+
+func transformObjectsToArrays(objects []map[string]interface{}) [][]interface{} {
+	var result [][]interface{}
+
+	for _, obj := range objects {
+		var arr []interface{}
+		for _, value := range obj {
+			arr = append(arr, value)
+		}
+		result = append(result, arr)
+	}
+
+	return result
+}
+func objectArrayToArray(data Expenses) [][]string {
+
+	var newData [][]string
+	var objected []string
+	for _, value := range data {
+		idStr := strconv.Itoa(value.Id)
+		amountStr := strconv.Itoa(value.Amount)
+		objected = append(objected, idStr)
+		objected = append(objected, value.Description)
+		objected = append(objected, value.Category)
+		objected = append(objected, value.Date.String())
+		objected = append(objected, amountStr)
+		newData = append(newData, objected)
+	}
+	fmt.Println("newData", newData)
+	return newData
+}
+func csvExport(fileName string, data [][]interface{}) error {
+	fmt.Println(data[0:2])
+	file, err := os.Create(fileName)
+	if err != nil {
+		return fmt.Errorf("error creating file: %v", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	var headers = []string{"id", "description", "category", "date", "amount"}
+	if err := writer.Write(headers); err != nil {
+		return fmt.Errorf("error writing to csv: %v", err)
+	}
+	for _, value := range data {
+		strRow := make([]string, len(value))
+		for i, v := range value {
+			strRow[i] = fmt.Sprintf("%v", v) // Convert to string using fmt.Sprintf
+		}
+		if err := writer.Write(strRow); err != nil {
+			return fmt.Errorf("error writing to csv: %v", err)
+		}
+	}
+	return nil
+}
+func ExportExpensesToCsv(fileName string) {
+	var content Expenses
+	var newContent []map[string]interface{}
+	fileBytes, err := getFileContent(dbFileName)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+	err = json.Unmarshal(fileBytes, &content)
+	err = json.Unmarshal(fileBytes, &newContent)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+	dttt := transformObjectsToArrays(newContent)
+	fmt.Println("Dttt", dttt)
+	// objectArrayToArray(content)
+	err = csvExport(fileName, dttt)
+	// if err != nil {
+	// 	log.Fatalf("Error: %v", err)
+	// }
+	// fmt.Printf("Data exported and CSV File created: %v", fileName)
+	// createFileIfNotExists("expenses.csv")
+	// csvBytes, err := getFileContent("expenses.csv")
+	// if err != nil {
+	// 	log.Fatalf("Error: %v", err)
+	// }
+	// reader, err := parseCsv(csvBytes)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// processCsv(reader)
+
+}
+
+func parseCsv(data []byte) (*csv.Reader, error) {
+	reader := csv.NewReader(bytes.NewReader(data))
+	return reader, nil
+}
+func processCsv(read *csv.Reader) {
+	for {
+		record, err := read.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Println("Error reading CSV data:", err)
+			break
+		}
+		fmt.Println(record)
+	}
 }

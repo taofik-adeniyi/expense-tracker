@@ -33,10 +33,11 @@ func main() {
 	case "add-category":
 		break
 	case "set-budget":
-		break
+		HandleBudget(flags[0:])
 	case "export":
-		break
+		HandleExport(flags[0:])
 	case "--help":
+		fmt.Println("Help command read the README file")
 		break
 	default:
 		fmt.Println("Invalid command passed supported commands are <add, list, update, delete, summary>")
