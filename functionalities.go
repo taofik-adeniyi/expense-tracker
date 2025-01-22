@@ -9,7 +9,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -408,38 +407,44 @@ func createFileIfNotExists(fileName string) *os.File {
 
 }
 
-func transformObjectsToArrays(objects []map[string]interface{}) [][]interface{} {
+func transformObjectsToArrays(objects []map[string]interface{}, keys []string) [][]interface{} {
 	var result [][]interface{}
 
 	for _, obj := range objects {
 		var arr []interface{}
-		for _, value := range obj {
-			arr = append(arr, value)
+
+		for _, key := range keys {
+			if key == "amount" {
+				value := fmt.Sprintf("$%v", obj[key])
+				arr = append(arr, value) // Extract values in the defined key order
+			} else if key == "date" {
+				str, ok := obj[key].(string)
+				if !ok {
+					log.Fatal("value is not a string")
+				}
+				// parsedTime, err := time.Parse(time.RFC3339Nano, str)
+				parsedTime, err := time.Parse(time.RFC3339Nano, str)
+
+				if err != nil {
+					log.Fatal("cant convert to date ")
+				}
+				formattedTime := parsedTime.Format("2006-01-02 15:04:05")
+				// date := parsedTime.Format("Jan 02, 2006")
+				arr = append(arr, formattedTime)
+
+			} else {
+				arr = append(arr, obj[key]) // Extract values in the defined key order
+			}
+
 		}
+
 		result = append(result, arr)
 	}
 
 	return result
 }
-func objectArrayToArray(data Expenses) [][]string {
 
-	var newData [][]string
-	var objected []string
-	for _, value := range data {
-		idStr := strconv.Itoa(value.Id)
-		amountStr := strconv.Itoa(value.Amount)
-		objected = append(objected, idStr)
-		objected = append(objected, value.Description)
-		objected = append(objected, value.Category)
-		objected = append(objected, value.Date.String())
-		objected = append(objected, amountStr)
-		newData = append(newData, objected)
-	}
-	fmt.Println("newData", newData)
-	return newData
-}
 func csvExport(fileName string, data [][]interface{}) error {
-	fmt.Println(data[0:2])
 	file, err := os.Create(fileName)
 	if err != nil {
 		return fmt.Errorf("error creating file: %v", err)
@@ -453,6 +458,7 @@ func csvExport(fileName string, data [][]interface{}) error {
 	if err := writer.Write(headers); err != nil {
 		return fmt.Errorf("error writing to csv: %v", err)
 	}
+
 	for _, value := range data {
 		strRow := make([]string, len(value))
 		for i, v := range value {
@@ -465,25 +471,25 @@ func csvExport(fileName string, data [][]interface{}) error {
 	return nil
 }
 func ExportExpensesToCsv(fileName string) {
-	var content Expenses
+	// var content Expenses
 	var newContent []map[string]interface{}
 	fileBytes, err := getFileContent(dbFileName)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	err = json.Unmarshal(fileBytes, &content)
+	// err = json.Unmarshal(fileBytes, &content)
 	err = json.Unmarshal(fileBytes, &newContent)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	dttt := transformObjectsToArrays(newContent)
-	fmt.Println("Dttt", dttt)
-	// objectArrayToArray(content)
+	// Define the desired key order
+	keys := []string{"id", "description", "category", "date", "amount"}
+	dttt := transformObjectsToArrays(newContent, keys)
 	err = csvExport(fileName, dttt)
-	// if err != nil {
-	// 	log.Fatalf("Error: %v", err)
-	// }
-	// fmt.Printf("Data exported and CSV File created: %v", fileName)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+	fmt.Printf("Data exported and CSV File created: %v", fileName)
 	// createFileIfNotExists("expenses.csv")
 	// csvBytes, err := getFileContent("expenses.csv")
 	// if err != nil {

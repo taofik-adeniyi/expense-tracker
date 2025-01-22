@@ -25,3 +25,4 @@ go.work.sum
 .env
 balance-db.json
 expense-db.json
+data*.csv
