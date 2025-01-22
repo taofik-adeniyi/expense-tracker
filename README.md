@@ -1,23 +1,6 @@
 # Expense Tracker
 
-Command: `expense-tracker --help`
-
-[Project Roadmap](https://roadmap.sh/projects/expense-tracker)
-
-Features:
-
-- Add an expense with a description and amount. (Completed)
-- Update an expense. (Completed)
-- Delete an expense. (Completed)
-- View all expenses.
-- View a summary of all expenses.
-- View a summary of expenses for a specific month (of the current year).
-
-Upcoming Features:
-
-- Add expense categories and filter expenses by category.
-- Set a budget for each month and display a warning when the budget is exceeded.
-- Export expenses to a CSV file.
+[https://roadmap.sh/projects/expense-tracker](https://roadmap.sh/projects/expense-tracker)
 
 Usage Examples:
 
@@ -31,11 +14,11 @@ Usage Examples:
 - Set a budget for a month:
 
   ```
-  $ expense-tracker set-budget --month <amount>
+  $ expense-tracker set-budget --month <month e.g 1-12> --amount <amount>
   # Budget set for month <month> of <amount>
   ```
 
-- Add an expense (with budget warning):
+- Add an expense:
 
   ```
   $ expense-tracker add --description "Lunch" --amount 20
@@ -75,14 +58,14 @@ Usage Examples:
 - View a summary for a specific month:
 
   ```
-  $ expense-tracker summary --month 8
+  $ expense-tracker summary --month <monthValue 1-12>
   # Total expenses for August: $20
   ```
 
 - Delete an expense by ID:
 
   ```
-  $ expense-tracker delete --id 2
+  $ expense-tracker delete --id <expenseId>
   # Expense deleted successfully
   ```
 
