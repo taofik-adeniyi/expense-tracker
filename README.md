@@ -2,7 +2,34 @@
 
 [https://roadmap.sh/projects/expense-tracker](https://roadmap.sh/projects/expense-tracker)
 
-Usage Examples:
+# How To Use
+
+1. go run build
+1. go run build
+1. go run build
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository_url>
+   ```
+2. Change to the cloned directory:
+   ```bash
+   cd <repository_directory>
+   ```
+3. Build the project
+   ```
+   go install
+   OR
+   go build
+   ```
+4. Run the software
+   ```
+   expense-tracker
+   ```
+
+# Usage Examples:
 
 - Help:
   ```

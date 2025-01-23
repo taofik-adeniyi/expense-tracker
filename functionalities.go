@@ -397,8 +397,8 @@ func createFileIfNotExists(fileName string) *os.File {
 	tF, err := os.Open(fileName)
 
 	if err != nil {
-		fmt.Printf("Error file does not exists: %v\n", err)
-		fmt.Println("Creating file .....")
+		// fmt.Printf("Error file does not exists: %v\n", err)
+		// fmt.Println("Creating file .....")
 		file, err := os.Create(fileName)
 		if err != nil {
 			fmt.Printf("Error: %v", err.Error())
