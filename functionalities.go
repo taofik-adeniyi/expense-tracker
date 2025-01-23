@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -80,42 +78,55 @@ func ListExpenses() (Expenses, error) {
 	}
 	return lists, nil
 }
-func Add(description string, amount int, month int) (int, error) {
-	// fmt.Printf("expense-tracker: description: %v amount: %v month: %v\n", description, amount, month)
-
-	// check budget balance
-	b, err := getBudget(month)
-
-	// check if balance for month has a budget
+func Add(description string, amount int, month ...int) (int, error) {
+	var monthValue int
+	if len(month) > 0 {
+		monthValue = month[0]
+	} else {
+		monthValue = int(time.Now().Month())
+	}
+	var budget int
+	b, err := getBudget(monthValue)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
-	// fmt.Printf("the initial balance: %v \n", b)
+	budget = b
 
-	// checking budget
-	// if amount is greater than budget balance return error an terminate function execution
+	if b == 0 {
+		// request user to set a budget before he can continue
+		fmt.Printf("You do not have a budget, setup budget for: %v\n", monthsOfYear[monthValue])
+		fmt.Println("Set up a budget:")
+		var budgit int
+		fmt.Scanln(&budgit)
+		res, err := SetBudget(monthValue, budgit)
+		if err != nil {
+			fmt.Printf("Error: %v", err)
+		}
+		budget = res
+	}
 
-	valid, err := budgetExceeded(amount, month)
+	valid, err := budgetExceeded(amount, monthValue)
 	if err != nil {
 		fmt.Println("Error:", err)
-		// return 0, err
 	}
 	if valid {
-		fmt.Printf("unable to add expense of amount: %v for: %v excedeed budget: %v\n", amount, description, b)
+		fmt.Printf("unable to add expense of amount: %v for expense: %v excedeed budget: %v\n", amount, description, budget)
 		fmt.Println("")
-		fmt.Print("Set up budget based on month given january is 1 febuary is 2")
-		fmt.Scanln(&month)
-		fmt.Print("budget amount")
+		fmt.Println("Enter number between 1-12 1 means January and 12 is December")
+		fmt.Scanln(&monthValue)
+		if monthValue < 1 && monthValue > 12 {
+			fmt.Println("The month value has to be in range 1-12 not more not less")
+			fmt.Println("Enter number between 1-12 1 means January and 12 is December")
+			fmt.Scanln(&monthValue)
+		}
+		fmt.Printf("Enter Budget Amount\n")
 		fmt.Scanln(&amount)
 	}
-	var amountToSet = b - amount
-	_, err = SetBudget(month, amountToSet)
+	var amountToSet = budget - amount
+	_, err = SetBudget(monthValue, amountToSet)
 	if err != nil {
 		fmt.Printf("Error: %v", err.Error())
 	}
-	// fmt.Printf("the budget saved: %v\n", budget)
-
-	// fetch expense file
 	fileByte, err := getFileContent(dbFileName)
 	if err != nil {
 		fmt.Printf("Error: %v", err.Error())
@@ -136,9 +147,11 @@ func Add(description string, amount int, month int) (int, error) {
 		Date:        time.Now(),
 		Description: description,
 		Amount:      amount,
-		Category:    "default category",
+		Category:    "default_category",
 	}
+	fmt.Println("b:amount", amount)
 	data = append(data, newExpense)
+	fmt.Println("a:amount", amount)
 
 	savedByte, err := json.Marshal(&data)
 	if err != nil {
@@ -152,7 +165,6 @@ func Add(description string, amount int, month int) (int, error) {
 }
 
 func (e Expenses) Summary(month ...int) string {
-	// # Total expenses: $30
 	var total int
 	var responseString string
 	if len(month) > 0 && month[0] >= 1 && month[0] <= 12 {
@@ -172,7 +184,6 @@ func (e Expenses) Summary(month ...int) string {
 }
 
 func (e Expenses) SummaryByCategory(category string) string {
-	// # Total expenses: $30
 	var total int
 	var responseString string
 	var found bool
@@ -191,10 +202,8 @@ func (e Expenses) SummaryByCategory(category string) string {
 }
 
 func Delete(id int) (int, error) {
-	// # Expense deleted successfully
 	var data Expenses
 	var newData Expenses
-	var found *bool
 	contentByte, err := getFileContent(dbFileName)
 	if err != nil {
 		return 0, err
@@ -204,11 +213,9 @@ func Delete(id int) (int, error) {
 		return 0, err
 	}
 	for _, value := range data {
-		if value.Id == id {
-			*found = true
-			continue
+		if value.Id != id {
+			newData = append(newData, value)
 		}
-		newData = append(newData, value)
 	}
 	toSaveByte, err := json.Marshal(newData)
 	if err != nil {
@@ -268,14 +275,13 @@ func SetBudget(month int, amount int) (int, error) {
 	if month >= 1 && month <= 12 {
 		budget[month] = amount
 
-		// fmt.Printf("your budget for the month of: %v is: %v\n", monthsOfYear[month], budget)
 		budgetByte, err := json.Marshal(budget)
 		if err != nil {
 			fmt.Printf("Error: %v", err)
 		}
 		saveToFileDb(balanceFileName, budgetByte)
 
-		return amount, nil //budget[month]
+		return amount, nil
 	}
 	return 0, fmt.Errorf("invalid month values passed %v", 0)
 }
@@ -288,7 +294,6 @@ func SetDefaultBalance() {
 		os.Exit(1)
 	}
 	if len(content) > 0 {
-		// fmt.Println("content exists already for balance database")
 		return
 	}
 	var budgets = map[int]int{
@@ -324,7 +329,6 @@ func getBudget(month int) (int, error) {
 
 	if err != nil {
 		fmt.Printf("Error: %v\n", err.Error())
-		// os.Exit(1)
 	}
 
 	err = json.Unmarshal(fileByteContent, &budget)
@@ -374,7 +378,6 @@ func saveToFileDb(fileName string, content []byte) error {
 		os.Exit(1)
 		return fmt.Errorf("Error saving to file storage: %v \n", err)
 	}
-	// fmt.Println("file content saved succesfully")
 	return nil
 }
 
@@ -394,8 +397,8 @@ func createFileIfNotExists(fileName string) *os.File {
 	tF, err := os.Open(fileName)
 
 	if err != nil {
-		fmt.Printf("Error: %v\n", err.Error())
-		fmt.Println("Creating file.....")
+		fmt.Printf("Error file does not exists: %v\n", err)
+		fmt.Println("Creating file .....")
 		file, err := os.Create(fileName)
 		if err != nil {
 			fmt.Printf("Error: %v", err.Error())
@@ -422,14 +425,12 @@ func transformObjectsToArrays(objects []map[string]interface{}, keys []string) [
 				if !ok {
 					log.Fatal("value is not a string")
 				}
-				// parsedTime, err := time.Parse(time.RFC3339Nano, str)
 				parsedTime, err := time.Parse(time.RFC3339Nano, str)
 
 				if err != nil {
 					log.Fatal("cant convert to date ")
 				}
 				formattedTime := parsedTime.Format("2006-01-02 15:04:05")
-				// date := parsedTime.Format("Jan 02, 2006")
 				arr = append(arr, formattedTime)
 
 			} else {
@@ -490,32 +491,4 @@ func ExportExpensesToCsv(fileName string) {
 		log.Fatalf("Error: %v", err)
 	}
 	fmt.Printf("Data exported and CSV File created: %v", fileName)
-	// createFileIfNotExists("expenses.csv")
-	// csvBytes, err := getFileContent("expenses.csv")
-	// if err != nil {
-	// 	log.Fatalf("Error: %v", err)
-	// }
-	// reader, err := parseCsv(csvBytes)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// processCsv(reader)
-
-}
-
-func parseCsv(data []byte) (*csv.Reader, error) {
-	reader := csv.NewReader(bytes.NewReader(data))
-	return reader, nil
-}
-func processCsv(read *csv.Reader) {
-	for {
-		record, err := read.Read()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			fmt.Println("Error reading CSV data:", err)
-			break
-		}
-		fmt.Println(record)
-	}
 }

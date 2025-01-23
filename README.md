@@ -4,6 +4,18 @@
 
 Usage Examples:
 
+- Help:
+  ```
+  expense-tracker --help
+  expense-tracler help
+  ```
+- Version
+
+  ```
+  expense-tracker --version
+  expense-tracker -V
+  ```
+
 - Add a category:
 
   ```
@@ -71,6 +83,6 @@ Usage Examples:
 
 - Export expenses to a CSV file:
   ```
-  $ expense-tracker export
-  # Expenses exported to expenses.csv
+  $ expense-tracker export <filename.csv>
+  # Expenses exported to specified file name
   ```

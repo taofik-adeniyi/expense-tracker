@@ -11,7 +11,6 @@ import (
 var categories []string
 
 func HandleCategory(flags []string) {
-	//expense-tracker add-category <category_name>
 	if len(flags) != 3 {
 		log.Fatal("Invalid command")
 	}
@@ -24,7 +23,6 @@ func HandleCategory(flags []string) {
 }
 
 func HandleExport(flags []string) {
-	//expense-tracker export <filename.csv>
 	if len(flags) != 3 {
 		log.Fatal("Invalid export command\nExpense-tracker export <filename.csv>")
 	}
@@ -40,7 +38,6 @@ func HandleExport(flags []string) {
 }
 
 func HandleBudget(flags []string) {
-	//expense-tracker set-budget --month <month> --amount <amount>
 	if len(flags) != 6 {
 		log.Fatal("Invalid command")
 	}
@@ -62,32 +59,20 @@ func HandleBudget(flags []string) {
 	fmt.Printf("Budget of month %v set to: $%d \n", monthsOfYear[month], res)
 }
 func HandleUpdate(f []string) {
-	// fmt.Println(len(f))
 	if len(f) < 5 || len(f) > 9 {
 		log.Fatal("update command error")
 	}
-	// var optionalArgs = f[5:9]
-	// fmt.Println(f[5]) // --amount
-	// fmt.Println("optionalArgs", optionalArgs)
-	// expense-tracker update id --description "" --amount "" --category "" //9
-	// result, err := Update()
+
 	id, err := strconv.Atoi(f[2])
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	// var descriptionFlag = f[3]
 	var descriptionValue = f[4]
-	// var amountFlag = f[5]
 	amountValue, err := strconv.Atoi(f[6])
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	// var categoryFlag = f[7]
 	var categoryValue = f[8]
-	// fmt.Println("id", id)
-	// fmt.Println("descriptionFlag:descriptionValue", descriptionFlag, descriptionValue)
-	// fmt.Println("amountFlag", amountFlag, amountValue)
-	// fmt.Println("categoryFlag", categoryFlag, categoryValue)
 
 	res, err := Update(id, descriptionValue, amountValue, categoryValue)
 	if err != nil {
@@ -96,9 +81,6 @@ func HandleUpdate(f []string) {
 	fmt.Println(res)
 }
 func HandleDelete(f []string) {
-	// check the length of the commands after the executable name
-	// expense-tracker delete --id 2
-	// Expense deleted successfully
 	if len(f) != 4 {
 		log.Fatal("Invalid delete command: the valid command is expense-tracker delete --id <id>")
 	}
@@ -116,7 +98,6 @@ func HandleDelete(f []string) {
 }
 
 func HandleList(f []string) {
-	fmt.Println("expense-tracker list")
 	if len(f) != 2 {
 		fmt.Println("Invalid list comamnd")
 		os.Exit(1)
@@ -129,7 +110,6 @@ func HandleList(f []string) {
 }
 
 func SummaryCategory(flags []string) {
-	fmt.Printf("expense-tracker summary %s %s \n", flags[0], flags[1])
 	expenses, err := ListExpenses()
 	if err != nil {
 		log.Fatal(err)
@@ -142,7 +122,6 @@ func SummaryMonth(flags []string) {
 	if err != nil {
 		log.Fatalf("Error: month value should be in the range 1-12 not more not less\nWhere 1-12 represents january to december\n%v", err)
 	}
-	fmt.Printf("expense-tracker summary %s %d \n", flags[0], monthId)
 
 	expenses, err := ListExpenses()
 	if err != nil {
@@ -154,6 +133,7 @@ func SummaryMonth(flags []string) {
 		fmt.Println(result)
 		return
 	}
+	fmt.Println("Invalid month value passed")
 }
 
 func HandleSummary(f []string) {
@@ -184,42 +164,52 @@ func HandleSummary(f []string) {
 }
 
 func HandleAddition(f []string) {
-	fmt.Println("expense-tracker add")
-	if len(f) != 8 {
-		os.Exit(1)
+	if len(f) < 6 && len(f) > 8 {
+		log.Fatal("Invalid command")
 	}
 	var description string
 	var amount int
 	var month int
 
-	var second = f[2]
-	var fourth = f[4]
-	var sixth = f[6]
+	var secondCommand = f[2]
+	var thirdCommand = f[4]
+	var sixthCommand string
+	if len(f) >= 8 {
+		sixthCommand = f[6]
+	}
 
-	if second == "--description" {
+	if secondCommand == "--description" {
 		description = f[3]
 	}
-	if fourth == "--amount" {
+	fmt.Println("month", month)
+	if thirdCommand == "--amount" {
 		n, err := strconv.Atoi(f[5])
 		if err != nil {
-			fmt.Printf("Error: parsing %v\nProvide a valid number greater than or equals 0.\n", f[5])
-			return
+			log.Fatalf("Error: parsing %v\nProvide a valid number greater than or equals 0.\n", f[5])
 		}
 		amount = n
 	}
-	if sixth == "--month" {
+
+	if sixthCommand == "--month" {
 		n, err := strconv.Atoi(f[7])
 		if err != nil {
-			fmt.Printf("Error: parsing %v\nProvide a valid number greater than or equals 0.\n", f[6])
-			return
+			log.Fatalf("Error: parsing %v\nProvide a valid number greater than or equals 0.\n", f[6])
 		}
 		month = n
 	}
 
-	added, err := Add(description, amount, month)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
+	if month > 0 {
+		added, err := Add(description, amount, month)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
+		fmt.Printf("# Expense added successfully (ID: %v)\n", added)
+	} else {
+		added, err := Add(description, amount)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
+		fmt.Printf("# Expense added successfully (ID: %v)\n", added)
 	}
-	fmt.Printf("# Expense added successfully (ID: %v)\n", added)
+
 }
